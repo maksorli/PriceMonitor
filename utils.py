@@ -11,6 +11,7 @@ from datetime import datetime
 from decimal import Decimal
 from csv_writer import write_to_csv
 from json_writer import write_to_json
+from database import PriceRecord
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -120,7 +121,15 @@ async def fetch_prices():
                            )
                                         # Логируем информацию
                     logger.info(f"Цена на {pair} на {exchange} изменилась на {price_diff:.4%}. Отправлено уведомление.")
- 
+
+                    await PriceRecord.save_price (
+                            title=f"{exchange} {pair}",
+                            price=current_price,
+                            max_price=current_price,
+                            min_price=last_price,
+                            difference=price_diff,
+                            total_amount=total_amount
+                    )
                     write_to_csv(
                         title = f"{exchange} {pair}",
                         price=current_price,
@@ -139,6 +148,7 @@ async def fetch_prices():
                         total_amount=total_amount,
                         coins = {pair[:3]:pair[4:]}
                         )
+                    
             # Обновляем последнюю цену для пары на данной бирже
             last_prices[exchange][pair] = current_price
 

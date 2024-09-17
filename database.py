@@ -1,10 +1,13 @@
+import logging
+import os
 from tortoise import fields, Tortoise
 from tortoise.models import Model
-import os
 from dotenv import load_dotenv
+from decimal import Decimal
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
 
 class PriceRecord(Model):
     id = fields.IntField(pk=True)
@@ -16,18 +19,27 @@ class PriceRecord(Model):
     difference = fields.DecimalField(max_digits=5, decimal_places=4)
     total_amount = fields.DecimalField(max_digits=15, decimal_places=8)
 
+    @classmethod
+    async def save_price(cls, title: str, price: Decimal, max_price: Decimal, min_price: Decimal, 
+                         difference: Decimal, total_amount: Decimal) -> None:
+        """Сохраняет запись в таблицу PriceRecord."""
+        try:
+            await cls.create(
+                title=title,
+                price=price,
+                max_price=max_price,
+                min_price=min_price,
+                difference=difference,
+                total_amount=total_amount
+            )
+            logger.info("Данные успешно сохранены в базу")
+        except Exception as e:
+            logger.error(f"Ошибка при сохранении данных: {e}")
 
-async def init_db():
+async def init_db() -> None:
+    """Инициализация базы данных."""
     await Tortoise.init(
         db_url=os.getenv("db_path"),
         modules={"models": ["database"]},
     )
     await Tortoise.generate_schemas()
-
-
-async def save_price(data):
-    await PriceRecord.create(**data)
-
-
-async def get_price_records():
-    return await PriceRecord.all()
