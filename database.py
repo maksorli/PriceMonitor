@@ -1,8 +1,11 @@
-from tortoise import fields, Tortoise 
+from tortoise import fields, Tortoise
 from tortoise.models import Model
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
+
+
 class PriceRecord(Model):
     id = fields.IntField(pk=True)
     title = fields.CharField(max_length=255)
@@ -16,7 +19,7 @@ class PriceRecord(Model):
 
 async def init_db():
     await Tortoise.init(
-        db_url=os.getenv("db_path") ,   
+        db_url=os.getenv("db_path"),
         modules={"models": ["database"]},
     )
     await Tortoise.generate_schemas()

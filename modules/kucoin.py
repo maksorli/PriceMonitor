@@ -15,8 +15,12 @@ class KuCoin(CryptoExchange):
             data = await response.json()
             tickers = data["data"]["ticker"]
             for ticker in tickers:
+                # проверяем и проводим  обратное преобразование для пар /BTC
                 if ticker["symbol"] == pair:
                     logger.info(f"{pair} - {ticker['last']}")
+                    if pair in ["ETH-BTC", "XMR-BTC", "SOL-BTC", "RUB-BTC", "DOGE-BTC"]:
+                        return 1 / float(ticker["last"])
                     return float(ticker["last"])
+
             logger.error(f"Ошибка: Нет данных для {pair} на KuCoin")
             return None

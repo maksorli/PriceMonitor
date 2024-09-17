@@ -14,7 +14,14 @@ class Binance(CryptoExchange):
         params = {"symbol": pair}
         async with session.get(self.api_url, params=params) as response:
             data = await response.json()
+
+            # проверяем и проводим  обратное преобразование для пар /BTC
             if "price" in data:
+                logger.info(f"{pair} - {data['price']}")
+                if pair in ["ETHBTC", "XMRBTC", "SOLBTC", "DOGEBTC"]:
+                    return 1 / float(data["price"])
+                return float(data["price"])
+            elif "price" in data:
                 logger.info(f"{pair} - {data['price']}")
                 return float(data["price"])
             else:
