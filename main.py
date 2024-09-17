@@ -1,71 +1,34 @@
 import asyncio
-from modules.binance import Binance
-from modules.coinmarketcap import CoinMarketCap
-from modules.bybit import Bybit
-from modules.gateio import GateIO
-from modules.kucoin import KuCoin
-from csv_writer import write_to_csv
-from database import init_db, save_price
-from mail_sender import send_email
+from database import init_db
 import logging
-from datetime import datetime
-from utils import pair_dict
+import time
+import schedule
+from utils import fetch_prices
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
-async def main():
-    # Инициализация базы данных
+# Функция для инициализации базы данных
+async def init():
     await init_db()
 
+# Функция-обертка для запуска асинхронных задач через schedule
+def run_async_task(task):
+    asyncio.run(task())
 
-async def main():
+# Основной запуск с использованием schedule
+def main():
+    # Инициализация базы данных
+    asyncio.run(init())
 
-    pairs = [
-        "BTC/USDT",
-        "ETH/BTC",
-        "XMR/BTC",
-        "SOL/BTC",
-        "BTC/RUB",
-        "DOGE/BTC",
-    ]  # порядок пар
+    # Добавляем задачу в расписание  
+    schedule.every(5).seconds.do(run_async_task, fetch_prices)
 
-    # Инициализация объектов для каждой биржи
-    binance = Binance(["BTCUSDT", "ETHBTC", "XMRBTC", "SOLBTC", "BTCRUB", "DOGEBTC"])
-    gateio = GateIO(
-        ["BTC_USDT", "ETH_BTC", "XMR_BTC", "SOL_BTC", "RUB_BTC", "DOGE_BTC"]
-    )
-    kucoin = KuCoin(
-        ["BTC-USDT", "ETH-BTC", "XMR-BTC", "SOL-BTC", "RUB-BTC", "DOGE-BTC"]
-    )
-    coinmarketcap = CoinMarketCap()
-
-    bybit = Bybit()
-
-    # Получаем котировки с бирж
-    all_prices = await asyncio.gather(
-        binance.get_prices(),
-        coinmarketcap.get_prices(),
-        gateio.get_prices(),
-        kucoin.get_prices(),
-        bybit.get_prices(),
-    )
-
-    # Логируем результаты от каждой биржи
-    logger.info(f"Binance: {all_prices[0]}")
-    logger.info(f"CoinMar: {all_prices[1]}")
-    logger.info(f" GateIO: {all_prices[2]}")
-    logger.info(f" KuCoin: {all_prices[3]}")
-    logger.info(f"  Bybit: {all_prices[4]}")
-
-    all_pairs_prices = pair_dict(all_prices)
-
-    # Логируем общий список котировок по всем парам
-    logger.info(f"Все пары с ценами: {all_pairs_prices}")
-
-    # Далее можно выбирать лучшие цены и сохранять в базу данных...
-
+    while True:
+        # Проверяем расписание и выполняем задачи
+        schedule.run_pending()
+        time.sleep(1)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

@@ -1,6 +1,7 @@
 import aiohttp
 import asyncio
 import logging
+from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -33,9 +34,10 @@ class Bybit:
                     if data and data.get("retCode") == 0:
                         price = data["result"]["list"][0]["lastPrice"]
                         logger.info(f"{pair} - {price}")
+                        # Используем Decimal для точных вычислений, делае оратное преобразование
                         if pair in ["ETHBTC", "XMRBTC", "SOLBTC", "DOGEBTC"]:
-                            return 1 / float(price)
-                        return float(price)
+                            return Decimal('1') / Decimal(price)
+                        return Decimal(price)
                     else:
                         logger.error(f"Ошибка в данных для {pair}: {data}")
                 else:

@@ -1,5 +1,6 @@
 from modules.cryptoexchange import CryptoExchange
 import logging
+from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -19,11 +20,9 @@ class Binance(CryptoExchange):
             if "price" in data:
                 logger.info(f"{pair} - {data['price']}")
                 if pair in ["ETHBTC", "XMRBTC", "SOLBTC", "DOGEBTC"]:
-                    return 1 / float(data["price"])
-                return float(data["price"])
-            elif "price" in data:
-                logger.info(f"{pair} - {data['price']}")
-                return float(data["price"])
+                    return 1 /Decimal(data["price"])
+                return Decimal(data["price"])
+            
             else:
                 logger.error(f"Ошибка: Нет цены для {pair} на Binance")
                 return None

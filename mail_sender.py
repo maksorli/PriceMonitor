@@ -2,11 +2,11 @@ import smtplib
 from email.mime.text import MIMEText
 
 
-def send_email(subject, body, to="recipient@example.com"):
+def send_email(subject, body, to="crypto@boy.com"):
     msg = MIMEText(body)
     msg["Subject"] = subject
-    msg["From"] = "sender@example.com"
+    msg["From"] = "crypto@monitor.com"
     msg["To"] = to
 
-    with smtplib.SMTP("localhost") as server:  # подключить  MailCatcher
-        server.sendmail("sender@example.com", [to], msg.as_string())
+    with smtplib.SMTP("localhost", 1025) as server:  # подключить  MailCatcher
+        server.sendmail("crypto@monitor.com", [to], msg.as_string())

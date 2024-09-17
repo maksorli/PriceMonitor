@@ -1,20 +1,19 @@
 import csv
 from datetime import datetime
+import os
 
+def write_to_csv(title, price, max_price, min_price, difference, total_amount):
+    # Заголовки таблицы (если файл пустой)
+    header = ['title', 'price', 'max price', 'min price', 'date', 'difference', 'total amount']
+    file_path = "liquorice.csv"
 
-def write_to_csv(data, filename="prices.csv"):
-    header = [
-        "title",
-        "price",
-        "max price",
-        "min price",
-        "date",
-        "difference",
-        "total amount",
-    ]
-    with open(filename, mode="a", newline="") as file:
-        writer = csv.DictWriter(file, fieldnames=header)
-        if file.tell() == 0:  # Записываем заголовок только если файл пустой
-            writer.writeheader()
-        for row in data:
-            writer.writerow(row)
+    # Проверяем, существует ли файл
+    file_exists = os.path.isfile(file_path)
+    with open(file_path, 'a', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        if not file_exists:
+            writer.writerow(header)
+        date_iso = datetime.now().isoformat()  # Текущая дата и время в формате ISO
+        writer.writerow([title, price, max_price, min_price, date_iso, difference, total_amount])
+
+    

@@ -4,7 +4,7 @@ import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-
+from  decimal import Decimal
 class KuCoin(CryptoExchange):
     """Класс для взаимодействия с биржей KuCoin"""
 
@@ -19,8 +19,8 @@ class KuCoin(CryptoExchange):
                 if ticker["symbol"] == pair:
                     logger.info(f"{pair} - {ticker['last']}")
                     if pair in ["ETH-BTC", "XMR-BTC", "SOL-BTC", "RUB-BTC", "DOGE-BTC"]:
-                        return 1 / float(ticker["last"])
-                    return float(ticker["last"])
+                        return 1 / Decimal(ticker["last"])
+                    return Decimal(ticker["last"])
 
             logger.error(f"Ошибка: Нет данных для {pair} на KuCoin")
             return None

@@ -1,6 +1,6 @@
 from modules.cryptoexchange import CryptoExchange
 import logging
-
+from decimal import Decimal
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -16,10 +16,11 @@ class GateIO(CryptoExchange):
             data = await response.json()
             if data and isinstance(data, list) and len(data):
                 logger.info(f"{pair} - {data[0]['last']}")
+                #проверяем и проводим  обратное преобразование для пар /BTC 
                 if pair in ["ETH_BTC", "XMR_BTC", "SOL_BTC", "RUB_BTC", "DOGE_BTC"]:
-                    return 1 / float(data[0]["last"])
-                return float(data[0]["last"])
-
+                    return 1/Decimal(data[0]["last"])
+                return Decimal(data[0]["last"])
+            
             else:
                 logger.info(f"Ошибка: Нет данных для {pair} на Gate.io")
                 return None
