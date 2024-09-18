@@ -9,6 +9,7 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+
 class PriceRecord(Model):
     id = fields.IntField(pk=True)
     title = fields.CharField(max_length=255)
@@ -20,8 +21,15 @@ class PriceRecord(Model):
     total_amount = fields.DecimalField(max_digits=15, decimal_places=8)
 
     @classmethod
-    async def save_price(cls, title: str, price: Decimal, max_price: Decimal, min_price: Decimal, 
-                         difference: Decimal, total_amount: Decimal) -> None:
+    async def save_price(
+        cls,
+        title: str,
+        price: Decimal,
+        max_price: Decimal,
+        min_price: Decimal,
+        difference: Decimal,
+        total_amount: Decimal,
+    ) -> None:
         """Сохраняет запись в таблицу PriceRecord."""
         try:
             await cls.create(
@@ -30,11 +38,12 @@ class PriceRecord(Model):
                 max_price=max_price,
                 min_price=min_price,
                 difference=difference,
-                total_amount=total_amount
+                total_amount=total_amount,
             )
             logger.info("Данные успешно сохранены в базу")
         except Exception as e:
             logger.error(f"Ошибка при сохранении данных: {e}")
+
 
 async def init_db() -> None:
     """Инициализация базы данных."""

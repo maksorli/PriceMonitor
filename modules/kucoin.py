@@ -4,7 +4,9 @@ import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-from  decimal import Decimal
+from decimal import Decimal
+
+
 class KuCoin(CryptoExchange):
     """Класс для взаимодействия с биржей KuCoin"""
 

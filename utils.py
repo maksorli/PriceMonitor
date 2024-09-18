@@ -12,15 +12,16 @@ from decimal import Decimal
 from csv_writer import write_to_csv
 from json_writer import write_to_json
 from database import PriceRecord
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 last_prices = {
-    'Binance': {},
-    'CoinMarketCap': {},
-    'GateIO': {},
-    'KuCoin': {},
-    'Bybit': {}
+    "Binance": {},
+    "CoinMarketCap": {},
+    "GateIO": {},
+    "KuCoin": {},
+    "Bybit": {},
 }
 
 # def pair_dict(all_prices):
@@ -57,15 +58,19 @@ async def fetch_prices():
         "BTC/SOL",
         "BTC/RUB",
         "BTC/DOGE",
-    ] 
-   
-    PRICE_CHANGE_THRESHOLD = Decimal('0.03')
+    ]
+
+    PRICE_CHANGE_THRESHOLD = Decimal("0.03")
 
     # Инициализация объектов для каждой биржи
     crypto_wallet = CryptoExchange()
     binance = Binance(["BTCUSDT", "ETHBTC", "XMRBTC", "SOLBTC", "BTCRUB", "DOGEBTC"])
-    gateio = GateIO(["BTC_USDT", "ETH_BTC", "XMR_BTC", "SOL_BTC", "RUB_BTC", "DOGE_BTC"])
-    kucoin = KuCoin(["BTC-USDT", "ETH-BTC", "XMR-BTC", "SOL-BTC", "RUB-BTC", "DOGE-BTC"])
+    gateio = GateIO(
+        ["BTC_USDT", "ETH_BTC", "XMR_BTC", "SOL_BTC", "RUB_BTC", "DOGE_BTC"]
+    )
+    kucoin = KuCoin(
+        ["BTC-USDT", "ETH-BTC", "XMR-BTC", "SOL-BTC", "RUB-BTC", "DOGE-BTC"]
+    )
     coinmarketcap = CoinMarketCap()
 
     bybit = Bybit()
@@ -85,8 +90,8 @@ async def fetch_prices():
     # logger.info(f" KuCoin: {all_prices[3]}")
     # logger.info(f"  Bybit: {all_prices[4]}")
 
-      # Преобразуем данные в читаемый формат (обрабатываем по парам)
-    exchanges = ['Binance', 'CoinMarketCap', 'GateIO', 'KuCoin', 'Bybit']
+    # Преобразуем данные в читаемый формат (обрабатываем по парам)
+    exchanges = ["Binance", "CoinMarketCap", "GateIO", "KuCoin", "Bybit"]
     for exchange, prices in zip(exchanges, all_prices):
         for pair, price_data in zip(pairs, prices):
             if price_data is None:
@@ -95,7 +100,7 @@ async def fetch_prices():
 
             # Текущая цена для пары
             current_price = Decimal(price_data)
-            
+
             # Проверяем, есть ли предыдущая цена для этой пары на данной бирже
             if pair in last_prices[exchange]:
                 last_price = last_prices[exchange][pair]
@@ -105,7 +110,9 @@ async def fetch_prices():
                 # Если цена изменилась на >= 0.03%, отправляем email
                 if abs(price_diff) >= 0:
 
-                    total_amount = calculate_total_amount(crypto_wallet, current_price, pair)
+                    total_amount = calculate_total_amount(
+                        crypto_wallet, current_price, pair
+                    )
                     # await send_email(pair, current_price, total_amount, price_diff)
                     send_email(
                         subject=f"Цена на {pair} выросла!",
@@ -116,46 +123,49 @@ async def fetch_prices():
                             f"Разница: {price_diff:.4%}\n"
                             f"Стоимость накоплений: {total_amount} {pair[4:]}\n"
                             f"Дата: {datetime.now().isoformat()}"
-    ),
-                        to="test@example.com"
-                           )
-                                        # Логируем информацию
-                    logger.info(f"Цена на {pair} на {exchange} изменилась на {price_diff:.4%}. Отправлено уведомление.")
+                        ),
+                        to="test@example.com",
+                    )
+                    # Логируем информацию
+                    logger.info(
+                        f"Цена на {pair} на {exchange} изменилась на {price_diff:.4%}. Отправлено уведомление."
+                    )
 
-                    await PriceRecord.save_price (
-                            title=f"{exchange} {pair}",
-                            price=current_price,
-                            max_price=current_price,
-                            min_price=last_price,
-                            difference=price_diff,
-                            total_amount=total_amount
-                    )
-                    write_to_csv(
-                        title = f"{exchange} {pair}",
-                        price=current_price,
-                        max_price=current_price,
-                        min_price=last_price,
-                        difference=price_diff,
-                        total_amount=total_amount
-                    )
-                    
-                    write_to_json(
-                        title = f"{exchange} {pair}",
+                    await PriceRecord.save_price(
+                        title=f"{exchange} {pair}",
                         price=current_price,
                         max_price=current_price,
                         min_price=last_price,
                         difference=price_diff,
                         total_amount=total_amount,
-                        coins = {pair[:3]:pair[4:]}
-                        )
-                    
+                    )
+                    write_to_csv(
+                        title=f"{exchange} {pair}",
+                        price=current_price,
+                        max_price=current_price,
+                        min_price=last_price,
+                        difference=price_diff,
+                        total_amount=total_amount,
+                    )
+
+                    write_to_json(
+                        title=f"{exchange} {pair}",
+                        price=current_price,
+                        max_price=current_price,
+                        min_price=last_price,
+                        difference=price_diff,
+                        total_amount=total_amount,
+                        coins={pair[:3]: pair[4:]},
+                    )
+
             # Обновляем последнюю цену для пары на данной бирже
             last_prices[exchange][pair] = current_price
 
         # logger.info(f"Предыдущие цены на {exchange}: {last_prices[exchange]}")
         # logger.info(f"{last_prices}")
 
+
 def calculate_total_amount(crypto_wallet, price, pair):
     # Пример расчета общей суммы с использованием переданного экземпляра
     total_amount = crypto_wallet.amount * price
-    return  total_amount
+    return total_amount

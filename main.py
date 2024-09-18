@@ -13,6 +13,7 @@ logging.basicConfig(level=logging.INFO)
 async def init():
     await init_db()
 
+
 # Функция-обертка для запуска асинхронных задач через schedule
 def run_async_task(task):
     loop = asyncio.get_event_loop()  # Получаем текущий event loop
@@ -24,13 +25,14 @@ async def main():
     # Инициализация базы данных
     await init()
 
-    # Добавляем задачу в расписание  
+    # Добавляем задачу в расписание
     schedule.every(5).seconds.do(run_async_task, fetch_prices)
 
     while True:
         # Проверяем расписание и выполняем задачи
         schedule.run_pending()
         await asyncio.sleep(1)  # Используем асинхронный sleep
+
 
 if __name__ == "__main__":
     try:

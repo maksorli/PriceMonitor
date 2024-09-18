@@ -5,6 +5,7 @@ from modules.cryptoexchange import CryptoExchange  # Базовый класс E
 import asyncio
 import logging
 from decimal import Decimal
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 # Загружаем переменные окружения из .env
@@ -13,9 +14,7 @@ load_dotenv()
 COINMARKET_API_KEY = os.getenv("COINMARKETCAP_API_KEY")
 
 if not COINMARKET_API_KEY:
-    raise ValueError(
-        "API ключ для CoinMarketCap не найден"
-    )
+    raise ValueError("API ключ для CoinMarketCap не найден")
 
 
 class CoinMarketCap(CryptoExchange):

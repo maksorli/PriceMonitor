@@ -36,7 +36,7 @@ class Bybit:
                         logger.info(f"{pair} - {price}")
                         # Используем Decimal для точных вычислений, делае оратное преобразование
                         if pair in ["ETHBTC", "XMRBTC", "SOLBTC", "DOGEBTC"]:
-                            return Decimal('1') / Decimal(price)
+                            return Decimal("1") / Decimal(price)
                         return Decimal(price)
                     else:
                         logger.error(f"Ошибка в данных для {pair}: {data}")
