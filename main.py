@@ -1,9 +1,9 @@
 import asyncio
-from database import init_db
+from utils.database import init_db
 import logging
 import time
 import schedule
-from utils import fetch_prices
+from utils.utils import fetch_prices
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

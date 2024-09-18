@@ -5,13 +5,13 @@ from modules.bybit import Bybit
 from modules.gateio import GateIO
 from modules.kucoin import KuCoin
 from modules.cryptoexchange import CryptoExchange
-from mail_sender import send_email
+from utils.mail_sender import send_email
 import logging
 from datetime import datetime
 from decimal import Decimal
-from csv_writer import write_to_csv
-from json_writer import write_to_json
-from database import PriceRecord
+from utils.csv_writer import write_to_csv
+from utils.json_writer import write_to_json
+from utils.database import PriceRecord
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -137,7 +137,6 @@ async def fetch_prices():
                         max_price=current_price,
                         min_price=last_price,
                         difference=price_diff,
-                        total_amount=total_amount,
                     )
                     write_to_csv(
                         title=f"{exchange} {pair}",

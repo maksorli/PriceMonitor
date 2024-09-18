@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 import asyncio
 from proxy_list import proxy_config
+from utils.database import MP_PriceRecord, init_db
 
 
 goods = ["копье", "дуршлаг", "красные носки", "леска для спиннинга"]
@@ -29,9 +30,13 @@ async def yandex_market(search_term, proxy_config):
         )
 
         page = await context.new_page()
-
-        await page.goto("https://market.yandex.ru/", wait_until="domcontentloaded")
-
+        try:
+            await page.goto(
+                "https://market.yandex.ru/", wait_until="load", timeout=60000
+            )
+        except TimeoutError:
+            logger.error("Превышено время ожидания загрузки страницы.")
+            return None
         await page.fill('input[name="text"]', search_term)
 
         await page.press('input[name="text"]', "Enter")
@@ -56,7 +61,7 @@ async def yandex_market(search_term, proxy_config):
         organic_element = await page.query_selector(
             '[data-apiary-widget-name="@light/Organic"]'
         )
-
+        logger.info("organic_element  найден")
         # Проверяем, найден ли элемент
         if organic_element:
             # Находим первую ссылку внутри этого блока
@@ -72,18 +77,22 @@ async def yandex_market(search_term, proxy_config):
 
                 # Открываем новую вкладку и переходим по ссылке
                 new_page = await context.new_page()
-                await new_page.goto(href, wait_until="load")
+                await new_page.goto(href, wait_until="domcontentloaded")
                 await page.wait_for_timeout(2000)
-                product_name_element = await new_page.query_selector(
-                    'h1[data-auto="productCardTitle"]'
-                )
+                try:
+                    product_name_element = await new_page.query_selector(
+                        'h1[data-auto="productCardTitle"]'
+                    )
+                    logger.info("product_name_element найден")
+                except:
+                    logger.info("product_name_element не найден")
 
                 # Извлекаем текстовое содержимое
                 if product_name_element:
                     product_name = await product_name_element.inner_text()
-                    print(f"Название товара: {product_name}")
+                    logger.info(f"Название товара: {product_name}")
                 else:
-                    print("Название товара не найдено.")
+                    logger.info("Название товара не найдено.")
 
                 # Ищем элемент с ценой товара по атрибуту 'data-auto="snippet-price-current"'
                 price_element = await new_page.query_selector(
@@ -94,30 +103,47 @@ async def yandex_market(search_term, proxy_config):
                 if price_element:
                     price_text = await price_element.inner_text()
                     price = re.sub(r"\D", "", price_text)
-                    print(f"Цена товара: {price}")
+                    logger.info(f"Цена товара: {price}")
                 else:
-                    print("Цена товара не найдена.")
+                    logger.info("Цена товара не найдена.")
 
                 description_element = await new_page.query_selector(
                     'div[aria-label="product-description"]'
                 )
                 if description_element:
                     description = await description_element.inner_text()
-                    print(f"Описание товара: {description}")
+                    logger.info(f"Описание товара: {description}")
                 else:
-                    print("Описание товара не найдено.")
+                    description = "описание отсутствует"
+                    logger.info("Описание товара не найдено.")
 
                 await new_page.wait_for_timeout(5000)
             else:
-                print("Ссылки не найдены в блоке.")
+                logger.info("Ссылки не найдены в блоке.")
         else:
-            print("Элемент с data-apiary-widget-name='@light/Organic' не найден.")
+            logger.info("Элемент с data-apiary-widget-name='@light/Organic' не найден.")
 
+        #пишем в бд
+        await MP_PriceRecord.mp_save_price(
+            title=product_name,
+            price=price,
+            max_price=price,
+            min_price=price,
+            description=description,
+        )
+
+        logger.info("парсинг успешно завершен.")
         await browser.close()
+
+
+async def init():
+    await init_db()
 
 
 async def main():
     # Запускаем задачи параллельно
+    # Инициализация базы данных
+    await init()
     await asyncio.gather(*(yandex_market(good, proxy_config) for good in goods))
 
 
