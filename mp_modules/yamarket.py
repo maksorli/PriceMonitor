@@ -1,16 +1,10 @@
 from playwright.async_api import async_playwright
-
 import logging
 import re
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
-import asyncio
-from proxy_list import proxy_config
-from utils.database import MP_PriceRecord, init_db
-
-
-goods = ["копье", "дуршлаг", "красные носки", "леска для спиннинга"]
+from utils.database import MP_PriceRecord
 
 
 async def yandex_market(search_term, proxy_config):
@@ -123,29 +117,16 @@ async def yandex_market(search_term, proxy_config):
         else:
             logger.info("Элемент с data-apiary-widget-name='@light/Organic' не найден.")
 
-        #пишем в бд
+        # пишем в бд
         await MP_PriceRecord.mp_save_price(
             title=product_name,
             price=price,
             max_price=price,
             min_price=price,
             description=description,
+            marketplace="Yandex Market",
+            link=href,
         )
 
         logger.info("парсинг успешно завершен.")
         await browser.close()
-
-
-async def init():
-    await init_db()
-
-
-async def main():
-    # Запускаем задачи параллельно
-    # Инициализация базы данных
-    await init()
-    await asyncio.gather(*(yandex_market(good, proxy_config) for good in goods))
-
-
-# Запуск программы
-asyncio.run(main())

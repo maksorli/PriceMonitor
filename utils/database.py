@@ -29,6 +29,8 @@ class MP_PriceRecord(Model):
     description = fields.CharField(max_length=1000)
     min_price = fields.DecimalField(max_digits=15, decimal_places=8)
     date = fields.DatetimeField(auto_now_add=True)
+    marketplace = fields.CharField(max_length=20)
+    link = fields.CharField(max_length=2083)
 
     @classmethod
     async def save_price(
@@ -62,6 +64,8 @@ class MP_PriceRecord(Model):
         max_price: Decimal,
         min_price: Decimal,
         description: str,
+        marketplace: str,
+        link: str,
     ) -> None:
         """Сохраняет запись в таблицу PriceRecord."""
         try:
@@ -71,6 +75,8 @@ class MP_PriceRecord(Model):
                 max_price=price,
                 min_price=price,
                 description=description or "Описание недоступно",
+                marketplace=marketplace,
+                link=link,
             )
             logger.info("Данные успешно сохранены в базу")
         except Exception as e:
