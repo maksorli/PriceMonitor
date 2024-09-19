@@ -14,10 +14,12 @@ logging.basicConfig(level=logging.INFO)
 load_dotenv()
 goods_str = os.getenv("goods")
 goods = goods_str.split(",") if goods_str else []
- 
+
 mp_frequency = int(os.getenv("mp_frequency"))
 logger.info(f"{goods}")
 logger.info(f"{mp_frequency}")
+
+
 async def init():
     await init_db()
 

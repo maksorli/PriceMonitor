@@ -24,5 +24,5 @@ class KuCoin(CryptoExchange):
                         return 1 / Decimal(ticker["last"])
                     return Decimal(ticker["last"])
 
-            #logger.error(f"Ошибка: Нет данных для {pair} на KuCoin")
+            # logger.error(f"Ошибка: Нет данных для {pair} на KuCoin")
             return None

@@ -6,8 +6,8 @@ import re
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
-import asyncio
-from proxy_list import proxy_config
+
+
 from utils.database import MP_PriceRecord, init_db
 
 
@@ -18,28 +18,35 @@ async def wildberries(search_term, proxy_config):
 
     async with async_playwright() as p:
 
-        browser = await p.chromium.launch(
-            headless=True,
-            proxy={
-                "server": f"http://{proxy_config['host']}:{proxy_config['port']}",
-                "username": proxy_config["username"],
-                "password": proxy_config["password"],
-            },
-        )
+        if proxy_config:
+            browser = await p.chromium.launch(
+                headless=True,
+                proxy={
+                    "server": f"http://{proxy_config['host']}:{proxy_config['port']}",
+                    "username": proxy_config["username"],
+                    "password": proxy_config["password"],
+                },
+            )
+        else:
+            browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.6613.138 Safari/537.36"
         )
 
         page = await context.new_page()
         try:
-            logger.error('открываю страницу https://www.wildberries.ru/ , таймаут 90 секунд')
+            logger.error(
+                "открываю страницу https://www.wildberries.ru/ , таймаут 90 секунд"
+            )
             await page.goto(
                 "https://www.wildberries.ru/", wait_until="load", timeout=60000
             )
         except TimeoutError:
-            logger.error("Превышено время ожидания загрузки страницы. https://www.wildberries.ru/")
-             
-            return 
+            logger.error(
+                "Превышено время ожидания загрузки страницы. https://www.wildberries.ru/"
+            )
+
+            return
         await page.fill("#searchInput", search_term)
 
         await page.press("#searchInput", "Enter")

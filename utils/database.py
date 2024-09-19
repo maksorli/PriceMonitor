@@ -19,6 +19,7 @@ class PriceRecord(Model):
     date = fields.DatetimeField(auto_now_add=True)
     difference = fields.DecimalField(max_digits=5, decimal_places=4)
     total_amount = fields.DecimalField(max_digits=15, decimal_places=8)
+
     @classmethod
     async def save_price(
         cls,
@@ -55,7 +56,6 @@ class MP_PriceRecord(Model):
     marketplace = fields.CharField(max_length=20)
     link = fields.CharField(max_length=2083)
 
-   
     @classmethod
     async def mp_save_price(
         cls,

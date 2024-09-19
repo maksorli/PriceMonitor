@@ -143,7 +143,7 @@ async def fetch_prices():
                         max_price=current_price,
                         min_price=last_price,
                         difference=price_diff,
-                        total_amount = total_amount
+                        total_amount=total_amount,
                     )
                     write_to_csv(
                         title=f"{exchange} {pair}",

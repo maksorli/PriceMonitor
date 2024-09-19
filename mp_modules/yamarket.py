@@ -8,30 +8,37 @@ logging.basicConfig(level=logging.INFO)
 from utils.database import MP_PriceRecord
 
 
-async def yandex_market(search_term, proxy_config):
+async def yandex_market(search_term, proxy_config=None):
 
     async with async_playwright() as p:
+        if proxy_config:
+            browser = await p.chromium.launch(
+                headless=True,
+                proxy={
+                    "server": f"http://{proxy_config['host']}:{proxy_config['port']}",
+                    "username": proxy_config["username"],
+                    "password": proxy_config["password"],
+                },
+            )
+        else:
+            browser = await p.chromium.launch(headless=True)
 
-        browser = await p.chromium.launch(
-            headless=True,
-            proxy={
-                "server": f"http://{proxy_config['host']}:{proxy_config['port']}",
-                "username": proxy_config["username"],
-                "password": proxy_config["password"],
-            },
-        )
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.6613.138 Safari/537.36"
         )
 
         page = await context.new_page()
         try:
-            logger.error('открываю страницу https://market.yandex.ru/, таймаут 90 секунд')
+            logger.error(
+                "открываю страницу https://market.yandex.ru/, таймаут 90 секунд"
+            )
             await page.goto(
                 "https://market.yandex.ru/", wait_until="load", timeout=90000
             )
         except TimeoutError:
-            logger.error("Превышено время ожидания загрузки страницы. https://market.yandex.ru/")
+            logger.error(
+                "Превышено время ожидания загрузки страницы. https://market.yandex.ru/"
+            )
             return
         await page.fill('input[name="text"]', search_term)
 

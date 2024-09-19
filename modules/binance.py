@@ -24,5 +24,5 @@ class Binance(CryptoExchange):
                 return Decimal(data["price"])
 
             else:
-                #logger.error(f"Ошибка: Нет цены для {pair} на Binance")
+                # logger.error(f"Ошибка: Нет цены для {pair} на Binance")
                 return None

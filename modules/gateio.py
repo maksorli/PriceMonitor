@@ -23,5 +23,5 @@ class GateIO(CryptoExchange):
                 return Decimal(data[0]["last"])
 
             else:
-                #logger.info(f"Ошибка: Нет данных для {pair} на Gate.io")
+                # logger.info(f"Ошибка: Нет данных для {pair} на Gate.io")
                 return None

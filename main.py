@@ -1,5 +1,5 @@
 import asyncio
-from utils.database import PriceRecord,init_db
+from utils.database import PriceRecord, init_db
 import logging
 import schedule
 from utils.utils import fetch_prices
