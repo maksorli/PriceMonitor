@@ -26,12 +26,13 @@ async def yandex_market(search_term, proxy_config):
 
         page = await context.new_page()
         try:
+            logger.error('открываю страницу https://market.yandex.ru/, таймаут 90 секунд')
             await page.goto(
-                "https://market.yandex.ru/", wait_until="load", timeout=60000
+                "https://market.yandex.ru/", wait_until="load", timeout=90000
             )
         except TimeoutError:
-            logger.error("Превышено время ожидания загрузки страницы.")
-            await browser.close()
+            logger.error("Превышено время ожидания загрузки страницы. https://market.yandex.ru/")
+            return
         await page.fill('input[name="text"]', search_term)
 
         await page.press('input[name="text"]', "Enter")

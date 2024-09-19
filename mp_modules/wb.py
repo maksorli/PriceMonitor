@@ -32,13 +32,14 @@ async def wildberries(search_term, proxy_config):
 
         page = await context.new_page()
         try:
+            logger.error('открываю страницу https://www.wildberries.ru/ , таймаут 90 секунд')
             await page.goto(
                 "https://www.wildberries.ru/", wait_until="load", timeout=60000
             )
         except TimeoutError:
-            logger.error("Превышено время ожидания загрузки страницы.")
+            logger.error("Превышено время ожидания загрузки страницы. https://www.wildberries.ru/")
              
-            return None
+            return 
         await page.fill("#searchInput", search_term)
 
         await page.press("#searchInput", "Enter")
