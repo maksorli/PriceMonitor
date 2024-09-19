@@ -1,9 +1,15 @@
 import asyncio
-from utils.database import init_db
+from utils.database import PriceRecord,init_db
 import logging
-import time
 import schedule
 from utils.utils import fetch_prices
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+goods = os.getenv("goods")
+crypto_frequency = int(os.getenv("mp_frequency"))
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -26,7 +32,7 @@ async def main():
     await init()
 
     # Добавляем задачу в расписание
-    schedule.every(5).seconds.do(run_async_task, fetch_prices)
+    schedule.every(crypto_frequency).seconds.do(run_async_task, fetch_prices)
 
     while True:
         # Проверяем расписание и выполняем задачи

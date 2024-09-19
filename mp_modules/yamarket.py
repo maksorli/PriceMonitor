@@ -1,6 +1,7 @@
 from playwright.async_api import async_playwright
 import logging
 import re
+from playwright.async_api import TimeoutError
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -12,7 +13,7 @@ async def yandex_market(search_term, proxy_config):
     async with async_playwright() as p:
 
         browser = await p.chromium.launch(
-            headless=False,
+            headless=True,
             proxy={
                 "server": f"http://{proxy_config['host']}:{proxy_config['port']}",
                 "username": proxy_config["username"],
@@ -30,7 +31,7 @@ async def yandex_market(search_term, proxy_config):
             )
         except TimeoutError:
             logger.error("Превышено время ожидания загрузки страницы.")
-            return None
+            await browser.close()
         await page.fill('input[name="text"]', search_term)
 
         await page.press('input[name="text"]', "Enter")

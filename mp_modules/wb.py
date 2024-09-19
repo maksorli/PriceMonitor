@@ -1,4 +1,5 @@
 from playwright.async_api import async_playwright
+from playwright.async_api import TimeoutError
 
 import logging
 import re
@@ -18,7 +19,7 @@ async def wildberries(search_term, proxy_config):
     async with async_playwright() as p:
 
         browser = await p.chromium.launch(
-            headless=False,
+            headless=True,
             proxy={
                 "server": f"http://{proxy_config['host']}:{proxy_config['port']}",
                 "username": proxy_config["username"],
@@ -36,6 +37,7 @@ async def wildberries(search_term, proxy_config):
             )
         except TimeoutError:
             logger.error("Превышено время ожидания загрузки страницы.")
+             
             return None
         await page.fill("#searchInput", search_term)
 

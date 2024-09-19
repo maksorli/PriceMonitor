@@ -12,7 +12,12 @@ from decimal import Decimal
 from utils.csv_writer import write_to_csv
 from utils.json_writer import write_to_json
 from utils.database import PriceRecord
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+
+crypto_threshold = os.getenv("crypto_threshold")
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -24,6 +29,7 @@ last_prices = {
     "Bybit": {},
 }
 
+# можно использовать для арбитража
 # def pair_dict(all_prices):
 #     """
 #     Собираем список по валютным парам
@@ -108,7 +114,7 @@ async def fetch_prices():
                 price_diff = (current_price - last_price) / last_price
                 logger.info(f"{price_diff} {current_price}  {last_price}")
                 # Если цена изменилась на >= 0.03%, отправляем email
-                if abs(price_diff) >= 0:
+                if price_diff >= Decimal(crypto_threshold):
 
                     total_amount = calculate_total_amount(
                         crypto_wallet, current_price, pair
@@ -137,6 +143,7 @@ async def fetch_prices():
                         max_price=current_price,
                         min_price=last_price,
                         difference=price_diff,
+                        total_amount = total_amount
                     )
                     write_to_csv(
                         title=f"{exchange} {pair}",

@@ -8,5 +8,5 @@ def send_email(subject, body, to="crypto@boy.com"):
     msg["From"] = "crypto@monitor.com"
     msg["To"] = to
 
-    with smtplib.SMTP("localhost", 1025) as server:  # подключить  MailCatcher
+    with smtplib.SMTP("mailcatcher", 1025) as server:  # подключить  MailCatcher
         server.sendmail("crypto@monitor.com", [to], msg.as_string())

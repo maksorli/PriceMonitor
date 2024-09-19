@@ -19,19 +19,6 @@ class PriceRecord(Model):
     date = fields.DatetimeField(auto_now_add=True)
     difference = fields.DecimalField(max_digits=5, decimal_places=4)
     total_amount = fields.DecimalField(max_digits=15, decimal_places=8)
-
-
-class MP_PriceRecord(Model):
-    id = fields.IntField(pk=True)
-    title = fields.CharField(max_length=255)
-    price = fields.DecimalField(max_digits=15, decimal_places=8)
-    max_price = fields.DecimalField(max_digits=15, decimal_places=8)
-    description = fields.CharField(max_length=1000)
-    min_price = fields.DecimalField(max_digits=15, decimal_places=8)
-    date = fields.DatetimeField(auto_now_add=True)
-    marketplace = fields.CharField(max_length=20)
-    link = fields.CharField(max_length=2083)
-
     @classmethod
     async def save_price(
         cls,
@@ -56,6 +43,19 @@ class MP_PriceRecord(Model):
         except Exception as e:
             logger.error(f"Ошибка при сохранении данных: {e}")
 
+
+class MP_PriceRecord(Model):
+    id = fields.IntField(pk=True)
+    title = fields.CharField(max_length=255)
+    price = fields.DecimalField(max_digits=15, decimal_places=8)
+    max_price = fields.DecimalField(max_digits=15, decimal_places=8)
+    description = fields.CharField(max_length=1000)
+    min_price = fields.DecimalField(max_digits=15, decimal_places=8)
+    date = fields.DatetimeField(auto_now_add=True)
+    marketplace = fields.CharField(max_length=20)
+    link = fields.CharField(max_length=2083)
+
+   
     @classmethod
     async def mp_save_price(
         cls,
@@ -86,7 +86,7 @@ class MP_PriceRecord(Model):
 async def init_db() -> None:
     """Инициализация базы данных."""
     await Tortoise.init(
-        db_url=os.getenv("db_path"),
+        db_url="postgres://pricemonitor:password@db:5432/pricemonitor",
         modules={"models": ["utils.database"]},
     )
     await Tortoise.generate_schemas()
